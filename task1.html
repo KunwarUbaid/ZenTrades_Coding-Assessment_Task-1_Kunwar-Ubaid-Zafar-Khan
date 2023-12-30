@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display JSON Data in Table</title>
+    <style>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                margin: 20px;
+                background-color: #f4f4f4;
+            }
+    
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                background-color: #fff;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+    
+            thead {
+                background-color: #32cd32;
+                color: #fff;
+            }
+    
+            th, td {
+                padding: 12px;
+                text-align: left;
+            }
+    
+            th {
+                border-bottom: 2px solid #ddd;
+            }
+    
+            #table-body tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+        </style>
+   </style
+</head>
+<body>
+
+    <table id="product-table">
+        <thead>
+            <tr>
+                <th>Subcategory</th>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Popularity</th>
+            </tr>
+        </thead>
+        <tbody id="data-output"></tbody>
+    </table>
+
+    <script>
+        // Fetch JSON data
+        fetch('https://s3.amazonaws.com/open-to-cors/assignment.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetched Data:', data); // Log fetched data structure
+
+                if (data && data.products && typeof data.products === 'object') {
+                    // Convert products object to array
+                    const productsArray = Object.keys(data.products).map(key => ({
+                        id: key,
+                        ...data.products[key]
+                    }));
+
+                    // Sort products by popularity in descending order
+                    productsArray.sort((a, b) => b.popularity - a.popularity);
+
+                    displayProducts(productsArray); // Call a function to display the sorted data in a table
+                } else {
+                    throw new Error('Fetched data does not contain products in an expected format');
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                // Handle errors here
+            });
+
+        // Function to display products in a table
+        function displayProducts(products) {
+            const tableBody = document.getElementById('data-output');
+
+            // Loop through the sorted products and create table rows
+            for (const product of products) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.subcategory}</td>
+                    <td>${product.title}</td>
+                    <td>${product.price}</td>
+                    <td>${product.popularity}</td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+    </script>
+
+</body>
+</html>
